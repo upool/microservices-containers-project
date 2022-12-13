@@ -1,0 +1,101 @@
+version: '3.3'
+
+services:
+  monitor:
+    image: 'spring-admin-server'
+    build:
+      context:  /users/pmontoyav/Desktop/bookstore-project/spring-admin-server
+    container_name: monitor
+    ports:
+      - "8090:8090"
+  eureka:
+    image: 'spring-eureka-server'
+    build:
+      context:  /users/pmontoyav/Desktop/bookstore-project/spring-eureka-server
+    container_name: eureka    
+    ports:
+      - "8761:8761"
+  rabbitmq:
+    image: 'rabbitmq:3-management-alpine'
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672  
+  app-pedidos:
+    image: 'bookstore-pedidos'
+    build:
+      context:  /users/pmontoyav/Desktop/bookstore-project/bookstore-pedidos
+    container_name: app-pedidos
+    depends_on:
+      - db-pedidos
+      - monitor
+      - eureka
+      - rabbitmq
+    ports:
+      - "8080:8080"
+    environment:      
+      - SPRING_BOOT_ADMIN_CLIENT_URL=http://monitor:8090
+      - SPRING_BOOT_ADMIN_CLIENT_INSTANCE_SERVICE_URL=http://app-pedidos:8080
+      - EUREKA_INSTANCE_HOSTNAME=eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-pedidos:5432/pedidos
+      - SPRING_DATASOURCE_USERNAME=pedidos
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_GENERATED_DDL=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+  app-envios:
+    image: 'bookstore-envios'
+    build:
+      context:  /users/pmontoyav/Desktop/bookstore-project/bookstore-envios
+    container_name: app-envios
+    depends_on:
+      - db-envios
+      - monitor
+      - eureka
+      - rabbitmq    
+    ports:
+      - "8081:8080"
+    environment:      
+      - SPRING_BOOT_ADMIN_CLIENT_URL=http://monitor:8090
+      - SPRING_BOOT_ADMIN_CLIENT_INSTANCE_SERVICE_URL=http://app-envios:8081
+      - EUREKA_INSTANCE_HOSTNAME=eureka
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-envios:5432/envios
+      - SPRING_DATASOURCE_USERNAME=envios
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_GENERATED_DDL=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+  db-pedidos:
+    image: 'postgres:13.1-alpine'
+    container_name: db-pedidos
+    environment:
+      - POSTGRES_USER=pedidos
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    #volumes:
+    #  - ./blockstorage/postgres/pedidos:/var/lib/postgresql/data
+  db-envios:
+    image: 'postgres:13.1-alpine'
+    container_name: db-envios
+    environment:
+      - POSTGRES_USER=envios
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - "5432"
+    ports:
+      - "5433:5432"
+    #volumes:
+    #  - ./blockstorage/postgres/envios:/var/lib/postgresql/data
