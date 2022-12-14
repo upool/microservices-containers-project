@@ -13,6 +13,4 @@ public interface ILibroService {
 
     Libro save(Libro libro);
 
-    List findByNombre(String nombre);
-
 }

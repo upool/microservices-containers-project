@@ -21,18 +21,12 @@ public class LibroServiceImpl implements ILibroService {
 
     @Override
     public Libro findById(Long id) {
-        return libroRepo.findById(id).orElse(null);
+        return libroRepo.findById(id).get();
     }
 
     @Override
     public Libro save(Libro libro) {
         return libroRepo.save(libro);
     }
-
-    @Override
-    public List findByNombre(String nombre) {
-        return libroRepo.findByNombre(nombre);
-    }
-
 
 }

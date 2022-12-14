@@ -27,27 +27,16 @@ public class LibroController {
     @GetMapping(value = "/find/{id}")
     public ResponseEntity<Libro> find(@PathVariable Long id) {
         Libro obj = libroService.findById(id);
-        if(obj != null) {
-            return new ResponseEntity<Libro>(obj, HttpStatus.OK);
-        } else{
-            return new ResponseEntity<Libro>(HttpStatus.NO_CONTENT);
+        if(obj == null){
+            return new ResponseEntity<Libro>(HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<Libro>(obj, HttpStatus.OK);
     }
 
     @PostMapping(value = "/save")
     public ResponseEntity<Libro> save(@RequestBody Libro libro) {
         Libro obj = libroService.save(libro);
         return new ResponseEntity<Libro>(obj, HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/find")
-    public ResponseEntity<List<Libro>> findByNombre(@RequestParam String nombre) {
-        List<Libro> obj = libroService.findByNombre(nombre);
-        if(!obj.isEmpty()) {
-            return new ResponseEntity<List<Libro>>(obj, HttpStatus.OK);
-        } else{
-            return new ResponseEntity<List<Libro>>(HttpStatus.NO_CONTENT);
-        }
     }
 
 }
